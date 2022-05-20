@@ -14,11 +14,14 @@ public class MemberDto {
     private String password;
     private String role;
 
+    private String refreshToken;
+
     @Builder
-    public MemberDto(String email, String password, String role){
+    public MemberDto(String email, String password, String role, String refreshToken){
         this.email = email;
         this.password = password;
         this.role = role;
+        this.refreshToken = refreshToken;
     }
 
 }

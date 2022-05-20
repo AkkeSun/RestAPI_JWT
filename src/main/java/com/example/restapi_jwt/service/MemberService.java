@@ -2,12 +2,16 @@ package com.example.restapi_jwt.service;
 
 import com.example.restapi_jwt.entity.MemberDto;
 import com.example.restapi_jwt.entity.Member_Jwt;
+import com.example.restapi_jwt.entity.TokenDto;
 import com.example.restapi_jwt.jwt.JwtTokenProvider;
 import com.example.restapi_jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.Collections;
 
@@ -16,9 +20,7 @@ import java.util.Collections;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
@@ -32,7 +34,7 @@ public class MemberService {
                             .roles(Collections.singletonList(dto.getRole()))
                             .build();
         Member_Jwt save = memberRepository.save(member);
-
+        System.out.println(member.getRoles());
         return MemberDto.builder().email(save.getEmail()).password(save.getPassword()).build();
     }
 
@@ -43,14 +45,56 @@ public class MemberService {
 
 
     @Transactional
-    public String memberLogin(MemberDto dto){
+    public MemberDto memberLogin(MemberDto dto){
 
         Member_Jwt member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(ArithmeticException::new);
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword()))
             throw new RuntimeException("아이디 혹은 비밀번호가 올바르지 않습니다");
 
-        // 토큰 발급 후 리턴
-        return jwtTokenProvider.createToken(dto);
+        // refresh token DB 저장
+        member.setRefreshToken(jwtTokenProvider.createRefreshToken());
+        memberRepository.save(member);
+
+        //access token (password 에 저장) 발급 후 리턴
+        return MemberDto.builder()
+                .email(member.getEmail())
+                .password(jwtTokenProvider.createToken(dto.getEmail()))
+                .refreshToken(member.getRefreshToken())
+                .build();
+    }
+
+
+    @Transactional
+    public TokenDto issueAccessToken (TokenDto tokenDto){
+
+        // refresh token 이 만료되었는지 확인
+        if(!jwtTokenProvider.validateTokenExceptExpiration(tokenDto.getRefreshToken())){
+            System.err.println("Refresh Token 이 만료되었습니다");
+            return TokenDto.builder().errCode("REFRESH_TOKEN_ERROR").build();
+        }
+
+        // 유저가 보낸 refresh 토근과 db에 저장된 refresh 토큰이 같은지 확인
+        Member_Jwt member = findMemberByToken(tokenDto.getAccessToken());
+        if(!member.getRefreshToken().equals(tokenDto.getRefreshToken())){
+            System.err.println("Refresh Token 이 유효하지 않습니다");
+            return TokenDto.builder().errCode("REFRESH_TOKEN_ERROR").build();
+        }
+
+        // Access Token 새로 생성
+        String newAccessToken = jwtTokenProvider.createToken(member.getEmail());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken();
+
+        member.setRefreshToken(newRefreshToken);
+        memberRepository.save(member);
+        return TokenDto.builder().refreshToken(newRefreshToken).accessToken(newAccessToken).build();
+    }
+
+    public Member_Jwt findMemberByToken(String accessToken) {
+        Authentication auth = jwtTokenProvider.getAuthentication(accessToken);
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        String username = userDetails.getUsername(); // email 추출
+
+        return  memberRepository.findByEmail(username).orElseThrow(RuntimeException::new);
     }
 
 }

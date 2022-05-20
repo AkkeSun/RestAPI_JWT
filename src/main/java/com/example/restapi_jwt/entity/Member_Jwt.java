@@ -3,6 +3,7 @@ package com.example.restapi_jwt.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 public class Member_Jwt implements UserDetails {
 
@@ -24,6 +25,8 @@ public class Member_Jwt implements UserDetails {
 
     private String email;
     private String password;
+
+    private String refreshToken;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();

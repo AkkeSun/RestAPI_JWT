@@ -18,7 +18,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody MemberDto dto) {
+    public MemberDto login(@RequestBody MemberDto dto) {
         return loginService.memberLogin(dto);
     }
 

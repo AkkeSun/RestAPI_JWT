@@ -1,4 +1,4 @@
-package com.example.restapi_jwt.jwt;
+package com.example.restapi_jwt.service;
 
 import com.example.restapi_jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
