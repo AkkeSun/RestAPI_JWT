@@ -1,21 +1,24 @@
-package com.example.restapi_jwt;
+package com.example.restapi_jwt.service;
 
 import com.example.restapi_jwt.entity.MemberDto;
 import com.example.restapi_jwt.entity.Member_Jwt;
+import com.example.restapi_jwt.jwt.JwtTokenProvider;
+import com.example.restapi_jwt.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService {
-
+public class MemberService {
 
     private final MemberRepository memberRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
@@ -26,7 +29,7 @@ public class LoginService {
         Member_Jwt member = Member_Jwt.builder()
                             .email(dto.getEmail())
                             .password(passwordEncoder.encode(dto.getPassword()))
-                            .roles(Arrays.asList(Role.ROLE_ADMIN))
+                            .roles(Collections.singletonList(dto.getRole()))
                             .build();
         Member_Jwt save = memberRepository.save(member);
 
@@ -40,13 +43,14 @@ public class LoginService {
 
 
     @Transactional
-    public MemberDto memberLogin(MemberDto dto){
+    public String memberLogin(MemberDto dto){
+
         Member_Jwt member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(ArithmeticException::new);
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword()))
             throw new RuntimeException("아이디 혹은 비밀번호가 올바르지 않습니다");
-        return MemberDto.builder().email(member.getEmail()).password(member.getPassword()).roles(member.getRoles()).build();
 
+        // 토큰 발급 후 리턴
+        return jwtTokenProvider.createToken(dto);
     }
-
 
 }

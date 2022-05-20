@@ -1,4 +1,4 @@
-package com.example.restapi_jwt;
+package com.example.restapi_jwt.repository;
 
 import com.example.restapi_jwt.entity.Member_Jwt;
 import org.springframework.data.jpa.repository.JpaRepository;

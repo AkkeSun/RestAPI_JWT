@@ -1,17 +1,22 @@
 package com.example.restapi_jwt.entity;
 
-import com.example.restapi_jwt.Role;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
-@Builder
-public class Member_Jwt {
+@NoArgsConstructor
+public class Member_Jwt implements UserDetails {
 
     @Id
     @GeneratedValue
@@ -20,13 +25,46 @@ public class Member_Jwt {
     private String email;
     private String password;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated(EnumType.STRING)
-    private List<Role> roles = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
 
-    public void addRole(Role role) {
-        this.roles.add(role);
+    @Builder
+    public Member_Jwt(String email, String password, List<String> roles){
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
     }
 
+    // Role 설정 셋팅
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role))
+                .collect(Collectors.toList());
+    }
 
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
