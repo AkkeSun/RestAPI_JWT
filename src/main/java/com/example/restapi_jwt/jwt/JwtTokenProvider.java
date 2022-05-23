@@ -56,7 +56,7 @@ public class JwtTokenProvider {
         Date now = new Date();
         return Jwts.builder()
                 .setIssuedAt(now)  // 토큰 생성일
-                .setExpiration(new Date(now.getTime() + tokenValidTime)) // 토큰 만료일
+                .setExpiration(new Date(now.getTime() + refreshTokenValidTime)) // 토큰 만료일
                 .signWith(SignatureAlgorithm.HS256, secretKey) // 인코딩 방식
                 .compact();
     }
