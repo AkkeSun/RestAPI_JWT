@@ -20,7 +20,7 @@ public class RestComponent {
 
         Map<String, Object> index = new HashMap<>();
         index.put("rel", "index");
-        index.put("href",requestURL);
+        index.put("href", requestURL);
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("data", responseObj);

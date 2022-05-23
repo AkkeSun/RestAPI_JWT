@@ -44,7 +44,9 @@ public class MemberService {
     @Transactional
     public MemberDto memberLogin(MemberDto dto){
 
-        Member_Jwt member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(ArithmeticException::new);
+        Member_Jwt member = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new RuntimeException("아이디 혹은 비밀번호가 올바르지 않습니다"));
+
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword()))
             throw new RuntimeException("아이디 혹은 비밀번호가 올바르지 않습니다");
 
@@ -64,7 +66,7 @@ public class MemberService {
 
     @Transactional
     public TokenDto issueAccessToken (TokenDto tokenDto){
-
+        System.err.println(tokenDto.toString());
         // STEP 1 : refresh token 이 만료되었는지 확인
         if(!jwtTokenProvider.validateTokenExceptExpiration(tokenDto.getRefreshToken()))
             throw new RuntimeException("Refresh Token 이 만료되었습니다");

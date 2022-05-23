@@ -1,7 +1,6 @@
 package com.example.restapi_jwt.controller;
 
 import com.example.restapi_jwt.service.RestComponent;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +21,7 @@ public class HomeController {
 
     @GetMapping("/admin")
     public ResponseEntity admin() {
+
         return restComponent.getResponseEntity(Map.of("val", "ADMIN!"));
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/exception")
@@ -36,11 +35,13 @@ public class ExceptionController {
             return restComponent.getResponseEntity(newToken);
         }
 
-        return  restComponent.getResponseEntity(Map.of("errCode", "goLoginView"));
+        TokenDto token = TokenDto.builder().errCode("notLogin").build();
+        return  restComponent.getResponseEntity(token);
     }
 
     @GetMapping("/denied")
     public ResponseEntity denied(){
-        return  restComponent.getResponseEntity(Map.of("errCode", "Access-Denied"));
+        TokenDto token = TokenDto.builder().errCode("Access-Denied").build();
+        return  restComponent.getResponseEntity(token);
     }
 }
