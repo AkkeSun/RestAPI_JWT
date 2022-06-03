@@ -1,6 +1,7 @@
 package com.example.restapi_jwt.jwt;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -91,15 +92,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    @Value("${web.url}")
+    private String webUrl;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOriginPattern("*"); // 허용할 url
-        configuration.addAllowedHeader("*");        // 허용할 header
-        configuration.addAllowedMethod("*");        // 허용할 Http Method
-        configuration.setAllowCredentials(true);
+        configuration.addAllowedOriginPattern(webUrl); // 허용할 url
+        configuration.addAllowedHeader("*");           // 허용할 header
+        configuration.addAllowedMethod("*");           // 허용할 Http Method
+        configuration.setAllowCredentials(true);       // 웹서버 쿠키 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

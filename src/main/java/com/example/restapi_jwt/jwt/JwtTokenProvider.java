@@ -1,6 +1,5 @@
 package com.example.restapi_jwt.jwt;
 
-import com.example.restapi_jwt.entity.MemberDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

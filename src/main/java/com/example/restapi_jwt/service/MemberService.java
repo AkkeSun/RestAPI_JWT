@@ -54,6 +54,9 @@ public class MemberService {
         member.setRefreshToken(jwtTokenProvider.createRefreshToken());
         memberRepository.save(member);
 
+        System.err.println("LOGIN SUCCESS");
+        System.err.println("REFERSH-TOKEN : " + member.getRefreshToken());
+
         //access token (password 에 저장) 발급 후 리턴
         return MemberDto.builder()
                 .email(member.getEmail())
@@ -63,10 +66,10 @@ public class MemberService {
                 .build();
     }
 
-
     @Transactional
     public TokenDto issueAccessToken (TokenDto tokenDto){
-        System.err.println(tokenDto.toString());
+        System.err.println("[issueAccessToken]");
+
         // STEP 1 : refresh token 이 만료되었는지 확인
         if(!jwtTokenProvider.validateTokenExceptExpiration(tokenDto.getRefreshToken()))
             throw new RuntimeException("Refresh Token 이 만료되었습니다");
@@ -74,6 +77,7 @@ public class MemberService {
         // STEP 2 : 유저가 보낸 refresh 토큰과 db에 저장된 refresh 토큰이 같은지 확인
         Member_Jwt member = memberRepository.findByRefreshToken(tokenDto.getRefreshToken())
                 .orElseThrow(() -> new RuntimeException("Refresh Token 이 유효하지 않습니다"));
+        System.err.println("[Refresh Token Check Success]");
 
         // STEP 3 : Access Token 신규 발급
         String newAccessToken = jwtTokenProvider.createToken(member.getEmail());
@@ -81,6 +85,8 @@ public class MemberService {
 
         member.setRefreshToken(newRefreshToken);
         memberRepository.save(member);
+
+        System.err.println("[New Access Token Created]");
         return TokenDto.builder().refreshToken(newRefreshToken).accessToken(newAccessToken).build();
     }
 

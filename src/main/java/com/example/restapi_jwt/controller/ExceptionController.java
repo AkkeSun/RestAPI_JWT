@@ -5,6 +5,7 @@ import com.example.restapi_jwt.service.MemberService;
 import com.example.restapi_jwt.service.RestComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +22,10 @@ public class ExceptionController {
     @Autowired
     private RestComponent restComponent;
 
+
     @GetMapping("/access")
-    public ResponseEntity nonLogin(HttpServletRequest request) {
+    public ResponseEntity nonLogin(HttpServletRequest request)
+    {
 
         String accessToken = request.getHeader("ACCESS-TOKEN");
 
@@ -39,8 +42,11 @@ public class ExceptionController {
         return  restComponent.getResponseEntity(token);
     }
 
+
     @GetMapping("/denied")
     public ResponseEntity denied(){
+
+        System.err.println("[DENIED]");
         TokenDto token = TokenDto.builder().errCode("Access-Denied").build();
         return  restComponent.getResponseEntity(token);
     }
